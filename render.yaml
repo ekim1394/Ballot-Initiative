@@ -21,6 +21,11 @@ services:
     envVars:
       - key: OPENAI_API_KEY
         sync: false
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: Ballot-Initiative-frontend
+          envVarKey: RENDER_EXTERNAL_URL
     region: virginia
     buildCommand: pip install -r requirements.txt
     startCommand: fastapi run app/api.py
