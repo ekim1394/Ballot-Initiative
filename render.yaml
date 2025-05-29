@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: Ballot-Initiative-frontend
+    runtime: static
+    repo: https://github.com/ekim1394/Ballot-Initiative
+    envVars:
+      - key: VITE_BACKEND_URL
+        fromService:
+          type: web
+          name: Ballot-Initiative
+          envVarKey: RENDER_EXTERNAL_URL
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeployTrigger: commit
+    rootDir: frontend
+  - type: web
+    name: Ballot-Initiative
+    runtime: python
+    repo: https://github.com/ekim1394/Ballot-Initiative
+    plan: free
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+    region: virginia
+    buildCommand: pip install -r requirements.txt
+    startCommand: fastapi run app/api.py
+    autoDeployTrigger: commit
+version: "1"
