@@ -14,7 +14,7 @@ app.state.voter_records_df = None
 origins = [
     "http://localhost",
     "http://localhost:5173",
-    os.getenv("RENDER_EXTERNAL_URL")
+    "https://ballot-initiative-frontend.onrender.com/"
 ]
 
 app.add_middleware(
