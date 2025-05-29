@@ -46,9 +46,11 @@ HELICONE_PERSONAL_API_KEY = os.getenv("HELICONE_PERSONAL_API_KEY")
 
 
 # load config
-with open("config.json", "r") as f:
-    config = json.load(f)
-
+config = {
+  "BASE_THRESHOLD": 85,
+  "TOP_CROP": 0.385,
+  "BOTTOM_CROP": 0.725
+}
 
 def collecting_pdf_encoded_images(file_path: str) -> List[str]:
     """Convert PDF pages to encoded images, cropping to target area.

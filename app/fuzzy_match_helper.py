@@ -18,8 +18,11 @@ REPODIR = os.getcwd()
 load_dotenv(os.path.join(REPODIR, ".env"), override=True)
 
 # load config
-with open("config.json", "r") as f:
-    config = json.load(f)
+config = {
+  "BASE_THRESHOLD": 85,
+  "TOP_CROP": 0.385,
+  "BOTTOM_CROP": 0.725
+}
 
 # Set up logging after imports
 log_directory = "logs"
