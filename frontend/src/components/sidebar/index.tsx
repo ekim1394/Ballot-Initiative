@@ -1,4 +1,4 @@
-import { FileCheck, Home, Settings } from "lucide-react";
+import { FileCheck, FileText, Home, Settings, Table } from "lucide-react";
 
 import {
   Sidebar,
@@ -32,6 +32,16 @@ export const items = [
     title: "Petition Validation",
     url: "/petition",
     icon: FileCheck,
+  },
+  {
+    title: "Voter Records",
+    url: "/voter-records",
+    icon: Table,
+  },
+  {
+    title: "Ballots",
+    url: "/ballots",
+    icon: FileText,
   },
 ];
 
@@ -101,7 +111,7 @@ export function AppSidebar() {
                   className={`${location.pathname === item.url ? "bg-gray-200 dark:bg-gray-800 rounded-sm" : ""}`}
                 >
                   <SidebarMenuButton asChild>
-                    <Link to={item.url}>
+                    <Link className="text-white" to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>

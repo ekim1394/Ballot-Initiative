@@ -2,14 +2,20 @@ import os
 
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+from app.voter_records.tables import Ballot, VoterRecord
 from fuzzy_match_helper import create_ocr_matched_df, create_select_voter_records
 from ocr_helper import create_ocr_df
 from routers import file
 from settings.settings_repo import config
 from utils import logger
+from piccolo_api.fastapi.endpoints import FastAPIWrapper, FastAPIKwargs
+from piccolo_api.crud.endpoints import PiccoloCRUD
+from fastapi.routing import Mount
+from piccolo_admin.endpoints import create_admin
+from piccolo.engine import engine_finder
+from contextlib import asynccontextmanager
 
 app = FastAPI(root_path="/api")
-app.state.voter_records_df = None
 
 origins = [
     "http://localhost",
@@ -25,7 +31,43 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-app.include_router(file.router)
+app.mount(
+    path="/admin/",
+    app=create_admin(
+        tables=[Ballot, VoterRecord],
+    ),
+)
+app.router.include_router(file.router, tags=["File Upload"])
+
+FastAPIWrapper(
+    root_url="/voter_record",
+    fastapi_app=app,
+    piccolo_crud=PiccoloCRUD(
+        table=VoterRecord,
+        read_only=False,
+    ),
+    fastapi_kwargs=FastAPIKwargs(all_routes={"tags": ["Voter Records"]}),
+)
+
+FastAPIWrapper(
+    root_url="/ballot",
+    fastapi_app=app,
+    piccolo_crud=PiccoloCRUD(
+        table=Ballot,
+        read_only=False,
+    ),
+    fastapi_kwargs=FastAPIKwargs(all_routes={"tags": ["Ballot"]}),
+)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Load the ML model
+    engine = engine_finder()
+    await engine.start_connnection_pool()
+    yield
+    engine = engine_finder()
+    await engine.close_connnection_pool()
 
 
 @app.post("/ocr", tags=["OCR"])

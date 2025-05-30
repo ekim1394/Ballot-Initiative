@@ -5,6 +5,7 @@ from io import BytesIO
 from fastapi.responses import FileResponse
 import pandas as pd
 from fastapi import APIRouter, Request, Response, UploadFile
+from app.voter_records.tables import Ballot, VoterRecord
 from utils import logger
 
 router = APIRouter(tags=["File Upload"])
@@ -12,6 +13,7 @@ router = APIRouter(tags=["File Upload"])
 if not os.path.exists("temp"):
     os.makedirs("temp")
     logger.info("Created temporary directory: temp")
+
 
 class UploadFileTypes(str, Enum):
     voter_records = "voter_records"
@@ -33,7 +35,7 @@ def clear_all_files(request: Request):
 
 
 @router.post("/upload/{filetype}")
-def upload_file(
+async def upload_file(
     filetype: UploadFileTypes, file: UploadFile, response: Response, request: Request
 ):
     """Uploads file to the server and saves it to a temporary directory.
@@ -49,9 +51,9 @@ def upload_file(
             if not file.filename.endswith(".pdf"):
                 response.status_code = 400
                 return {"error": "Invalid file type. Only pdf files are allowed."}
-            with open(os.path.join("temp", "ballot.pdf"), "wb") as buffer:
-                buffer.write(file.file.read())
-                logger.info("File saved to temporary directory: temp/ballot.pdf")
+            contents = await file.read()
+            instance = Ballot(name=file.filename, pdf_data=contents)
+            await instance.save()
         case UploadFileTypes.voter_records:
             if not file.filename.endswith(".csv"):
                 response.status_code = 400
@@ -59,18 +61,6 @@ def upload_file(
             contents = file.file.read()
             buffer = BytesIO(contents)
             df = pd.read_csv(buffer, dtype=str)
-
-            # Create necessary columns
-            df["Full Name"] = df["First_Name"] + " " + df["Last_Name"]
-            df["Full Address"] = (
-                df["Street_Number"]
-                + " "
-                + df["Street_Name"]
-                + " "
-                + df["Street_Type"]
-                + " "
-                + df["Street_Dir_Suffix"]
-            )
 
             required_columns = [
                 "First_Name",
@@ -80,12 +70,18 @@ def upload_file(
                 "Street_Type",
                 "Street_Dir_Suffix",
             ]
-            request.app.state.voter_records_df = df
 
             # Verify required columns
             if not all(col in df.columns for col in required_columns):
                 response.status_code = 400
                 return {"error": "Missing required columns in voter records file."}
+
+            data = df.to_dict(orient="records")
+            for row in data:
+                instance = VoterRecord(**row)
+                await instance.save()
+            return {"message": f"{len(data)} voter records uploaded successfully"}
+            
 
     return {"filename": file.filename}
 
