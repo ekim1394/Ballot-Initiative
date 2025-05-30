@@ -1,7 +1,6 @@
 from typing import List
 import base64
 import os
-import json
 from tqdm.notebook import tqdm
 from dotenv import load_dotenv
 import pandas as pd
@@ -46,11 +45,8 @@ HELICONE_PERSONAL_API_KEY = os.getenv("HELICONE_PERSONAL_API_KEY")
 
 
 # load config
-config = {
-  "BASE_THRESHOLD": 85,
-  "TOP_CROP": 0.385,
-  "BOTTOM_CROP": 0.725
-}
+config = {"BASE_THRESHOLD": 85, "TOP_CROP": 0.385, "BOTTOM_CROP": 0.725}
+
 
 def collecting_pdf_encoded_images(file_path: str) -> List[str]:
     """Convert PDF pages to encoded images, cropping to target area.

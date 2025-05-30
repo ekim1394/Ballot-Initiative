@@ -1,7 +1,6 @@
 # needed libraries
 ### structured outputs; replacements
 import os
-import json
 from typing import List, Tuple
 from tqdm.notebook import tqdm
 from rapidfuzz import fuzz
@@ -18,11 +17,7 @@ REPODIR = os.getcwd()
 load_dotenv(os.path.join(REPODIR, ".env"), override=True)
 
 # load config
-config = {
-  "BASE_THRESHOLD": 85,
-  "TOP_CROP": 0.385,
-  "BOTTOM_CROP": 0.725
-}
+config = {"BASE_THRESHOLD": 85, "TOP_CROP": 0.385, "BOTTOM_CROP": 0.725}
 
 # Set up logging after imports
 log_directory = "logs"

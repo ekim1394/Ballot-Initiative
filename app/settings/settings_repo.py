@@ -72,12 +72,13 @@ def load_settings(
         with open(file, "rb") as f:
             settings = tomllib.load(f)
     except:
-        logger.info(
-            f"Could not find settings file at {file}. Using default settings."
-        )
+        logger.info(f"Could not find settings file at {file}. Using default settings.")
         settings = {
             "selected_ocr_engine": "open_ai",
-            "open_ai": {"api_key": os.getenv("OPENAI_API_KEY"), "model": "o4-mini"},
+            "open_ai": {
+                "api_key": os.getenv("OPENAI_API_KEY"),
+                "model": "gpt-4.1-nano",
+            },
             "debug_mode": False,
         }
 
